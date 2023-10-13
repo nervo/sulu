@@ -32,7 +32,7 @@ class Configuration implements ConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('api_key')->defaultValue('')->end()
-                                ->scalarNode('endpoint')->defaultValue('http://open.mapquestapi.com/nominatim/v1/search.php')->end()
+                                ->scalarNode('endpoint')->defaultValue('https://www.mapquestapi.com/geocoding/v1/address')->end()
                             ->end()
                         ->end()
                         ->arrayNode('google')

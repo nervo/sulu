@@ -12,6 +12,7 @@
 namespace Sulu\Bundle\LocationBundle\Geolocator\Service;
 
 use GuzzleHttp\ClientInterface;
+use PHPUnit\Util\Exception;
 use Psr\Http\Message\ResponseInterface;
 use Sulu\Bundle\LocationBundle\Geolocator\GeolocatorInterface;
 use Sulu\Bundle\LocationBundle\Geolocator\GeolocatorLocation;
@@ -73,7 +74,7 @@ class NominatimGeolocator implements GeolocatorInterface
             $this->baseUrl,
             [
                 'query' => [
-                    'q' => $query,
+                    'location' => $query,
                     'format' => 'json',
                     'addressdetails' => 1,
                     'key' => $this->key,
@@ -94,33 +95,52 @@ class NominatimGeolocator implements GeolocatorInterface
 
         if ($response instanceof ResponseInterface) {
             // BC to support for guzzle client
-            $results = \json_decode($response->getBody(), true);
+            $responseBody = \json_decode($response->getBody(), true);
         } else {
-            $results = $response->toArray();
+            $responseBody = $response->toArray();
         }
 
         $response = new GeolocatorResponse();
-        foreach ($results as $result) {
-            $location = new GeolocatorLocation();
 
-            foreach ([
-                'setStreet' => 'road',
-                'setNumber' => 'house_number',
-                'setCode' => 'postcode',
-                'setTown' => 'city',
-                'setCountry' => 'country_code',
-            ] as $method => $key) {
-                if (isset($result['address'][$key])) {
-                    $location->$method($result['address'][$key]);
+
+        if (0 === $responseBody['info']['statuscode']) {
+            if (array_key_exists('results', $responseBody) and 0 < count($responseBody['results'])) {
+                $results = $responseBody['results'];
+
+                foreach ($results as $result) {
+                    $locations = $result['locations'];
+
+                    foreach ($locations as $locationId => $location) {
+                        $geoLocation = new GeolocatorLocation();
+
+                        foreach ([
+                             'setStreet' => 'street',
+                             'setCode' => 'postalCode',
+                             'setTown' => 'adminArea5',
+                             'setCountry' => 'adminArea1',
+                         ] as $method => $key) {
+                            if (isset($location[$key])) {
+                                $geoLocation->$method($location[$key]);
+                            }
+                        }
+
+                        if (isset($location['latLng'])) {
+                            $geoLocation->setLatitude($location['latLng']['lat']);
+                            $geoLocation->setLongitude($location['latLng']['lng']);
+                        }
+
+                        $geoLocation->setId($locationId);
+                        $displayTitle = trim($geoLocation->getStreet() . ', ' . $geoLocation->getTown() . ', ' . $geoLocation->getCountry(), ',');
+                        $geoLocation->setDisplayTitle($displayTitle);
+
+                        $response->addLocation($geoLocation);
+                    }
                 }
+            } else {
+                throw new Exception('No results found.');
             }
-
-            $location->setId($result['place_id']);
-            $location->setLongitude($result['lon']);
-            $location->setLatitude($result['lat']);
-            $location->setDisplayTitle($result['display_name']);
-
-            $response->addLocation($location);
+        } else {
+            throw new Exception($responseBody['info']['messages'][0]);
         }
 
         return $response;
