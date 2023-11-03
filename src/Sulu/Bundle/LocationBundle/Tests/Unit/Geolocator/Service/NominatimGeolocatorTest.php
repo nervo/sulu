@@ -27,16 +27,15 @@ class NominatimGeolocatorTest extends TestCase
         return [
             [
                 '10, Rue Alexandre Dumas, Paris',
-                2,
+                1,
                 [
-                    'displayTitle' => '10, Rue Alexandre Dumas, Ste-Marguerite, 11th Arrondissement, Paris, Ile-de-France, F-75011, Metropolitan France, European Union',
-                    'street' => 'Rue Alexandre Dumas',
-                    'number' => '10',
-                    'code' => 'F-75011',
+                    'displayTitle' => '10 Rue Alexandre Dumas, Paris, FR',
+                    'street' => '10 Rue Alexandre Dumas',
+                    'code' => '75011',
                     'town' => 'Paris',
                     'country' => 'FR',
-                    'longitude' => '2.3898894',
-                    'latitude' => '48.8529486',
+                    'longitude' => '2.38986',
+                    'latitude' => '48.85297',
                 ],
             ],
         ];

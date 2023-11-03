@@ -102,7 +102,6 @@ class NominatimGeolocator implements GeolocatorInterface
 
         $response = new GeolocatorResponse();
 
-
         if (0 === $responseBody['info']['statuscode']) {
             if (array_key_exists('results', $responseBody) and 0 < count($responseBody['results'])) {
                 $results = $responseBody['results'];
