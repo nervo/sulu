@@ -250,6 +250,13 @@ class BasePageDocument implements
     protected $versions = [];
 
     /**
+     * Date of lastModified.
+     *
+     * @var \DateTime|null
+     */
+    protected $lastModified;
+
+    /**
      * Date of authoring.
      *
      * @var \DateTime
@@ -510,6 +517,29 @@ class BasePageDocument implements
     public function setVersions($versions)
     {
         $this->versions = $versions;
+    }
+
+    public function getLastModifiedEnabled()
+    {
+        return null !== $this->lastModified;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getLastModified()
+    {
+        return $this->lastModified;
+    }
+
+    /**
+     * @param \DateTime|null $lastModified
+     *
+     * @return void
+     */
+    public function setLastModified($lastModified)
+    {
+        $this->lastModified = $lastModified;
     }
 
     public function getAuthored()
